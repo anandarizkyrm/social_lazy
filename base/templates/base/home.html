@@ -1,0 +1,31 @@
+{% extends 'main.html' %} {% block content %}
+
+<div class="">
+  <div class="flex justify-between my-4">
+    <h1 class="font-bold text-3xl">
+      Welcome {% if request.user.is_authenticated %} {{request.user.username}}
+      {%else %} Anonymouse {%endif%}
+    </h1>
+    {% if request.user.is_authenticated %}
+    <button class="bg-blue-600 text-white p-2 rounded-md">Create Post</button>
+    {%endif%} 
+    
+</div>
+    {% for post in posts%}
+
+    <div class="bg-gray-200 shadow-md p-4 my-2 hover:bg-gray-400">
+        <p class="font-bold">{{post.author.username}}</p>
+        <p>{{post.text}}</p>
+        
+        <div class="flex gap-2">
+            {% comment %} <p>likes : {{post.like_count}}</p> {% endcomment %}
+            <a href="/post/{{post.id}}">
+                <p>Comments : {{ post.comment_count|add:post.reply_count}}</p>
+            </a>
+      </div>
+    </div>
+    {%endfor%}
+  </div>
+
+</div>
+{% endblock %}

@@ -21,9 +21,18 @@ class Post(models.Model):
     text = models.TextField(null=True, blank=True)
     image: models.ImageField(null=True)
 
-    likes = models.ManyToManyField(User, related_name="liked_posts", blank=True)
+    likes = models.ManyToManyField(
+        User, related_name="liked_posts", blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def like_count(self):
+        return self.likes.count()
+
+    @property
+    def comments_count(self):
+        return self.likes.count()
 
     def __str__(self):
         return self.text
@@ -44,7 +53,10 @@ class CommentReply(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     reply = models.TextField(max_length=200)
     author_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, null=False)
+    comment_id = models.ForeignKey(
+        Comment, on_delete=models.CASCADE, null=False)
+    # post_id = models.ForeignKey(
+    #     Post, on_delete=models.CASCADE, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

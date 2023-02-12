@@ -1,0 +1,48 @@
+{% extends 'main.html' %} {% block content %}
+
+<div>
+  <div class="bg-gray-200 shadow-md p-4 my-2 hover:bg-gray-400">
+    <div class="flex justify-between"> 
+        <p class="font-bold">{{post.author.username}}</p>
+        <p>{{post.created|timesince}}</p>
+    </div>
+    <p>{{post.text}}</p>
+
+    <div class="flex gap-2">
+      <p>likes : {{post.like_count}}</p>
+      <p>Comments : {{ total_comment }}</p>
+    </div>
+    <form method="POST" action="/comment-on-post/{{post.id}}/"  >
+      {% csrf_token %}
+      <input class="w-full h-12 rounded-md p-2 mt-2" name="comment" placeholder="Comment To This Post Here . . . "/>
+    </form>
+  </div>
+
+  {% for comment in comments%}
+  <div class="shadow-md p-4 my-2 hover:bg-gray-400">
+    <div class="flex justify-between">
+        <p>Replied to @{{post.author.username}}</p>
+        <p>{{comment.created|timesince}}</p>
+    </div>
+    <p class="font-bold">{{comment.author_id.username}}</p>
+    <p>{{comment.comment}}</p>
+    <form method="POST" action="/reply-comment/{{comment.id}}/{{post.id}}/"  >
+      {% csrf_token %}
+      <input class="w-full h-12 rounded-md p-2 mt-2" name="reply" placeholder="Reply To This Comment  . . . "/>
+    </form>
+  </div>
+  {% for comment in comment.commentreply_set.all%}
+  <div style="margin-left: 32px" class="shadow-md p-4 my-2 hover:bg-gray-400">
+    <div class="flex justify-between">
+      <p>Replied to @{{comment.comment_id.author_id.username}}</p>
+      <p>{{comment.created|timesince}}</p>
+    </div>
+      <p class="font-bold">{{comment.author_id.username}}</p>
+      <p>{{comment.reply}}</p>
+    </div>
+    
+    {%endfor%} {%endfor%}
+  </div>
+
+  {% endblock %}
+</div>
