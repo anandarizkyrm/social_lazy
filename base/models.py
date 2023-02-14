@@ -18,7 +18,7 @@ class User(AbstractUser):
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    text = models.TextField(null=True, blank=True)
+    text = models.TextField(null=False, blank=False, default="")
     image = models.ImageField(null=True)
 
     likes = models.ManyToManyField(

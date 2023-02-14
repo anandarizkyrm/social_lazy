@@ -24,13 +24,16 @@ def getUserPosts(request, id):
 
 @api_view(['POST'])
 def createPost(request):
-    print(request.META)
     try:
-        serializer = PostSerializers(data=request.data)
+        serializer = PostSerializers(data={
+            "text": request.data.get("text"),
+            "author": request.META["HTTP_USER"]
+        })
         if serializer.is_valid():
-            serializer.save(auhor=request.user)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            raise ValidationError(serializer.errors)
-    except:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
