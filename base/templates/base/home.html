@@ -7,22 +7,43 @@
       {%else %} Anonymouse {%endif%}
     </h1>
     {% if request.user.is_authenticated %}
-    <button class="bg-blue-600 text-white p-2 rounded-md">Create Post</button>
+    <a href="/create" class="bg-blue-600 text-white p-2 rounded-md">Create Post</a>
     {%endif%} 
     
 </div>
+{%for message in messages%}
+<p class="my-4 text-green-500">{{message}}</p>
+{%endfor%}
+
     {% for post in posts%}
 
-    <div class="bg-gray-200 shadow-md p-4 my-2 hover:bg-gray-400">
+    <div class="bg-gray-200 shadow-md p-4 my-2 hover:bg-gray-400 flex justify-between">
+      <div class="w-full relative"> 
+        {% if request.user == post.author %}
+        <div class="absolute top-2 right-2">
+         <a class="text-blue-500" href="/edit/{{post.id}}/">
+           Edit
+         </a> |   
+          <form method="POST" action="/delete-post/{{post.id}}/">
+            {% csrf_token %}
+            <button type="submit" class="text-blue-500" href="/delete">
+               Delete
+            </button>
+          </form>
+       </div>
+         {%endif%}
+
         <p class="font-bold">{{post.author.username}}</p>
         <p>{{post.text}}</p>
         
-        <div class="flex gap-2">
+         <div class="flex gap-2  justify-end h-full">
             {% comment %} <p>likes : {{post.like_count}}</p> {% endcomment %}
             <a href="/post/{{post.id}}">
                 <p>Comments : {{ post.comment_count|add:post.reply_count}}</p>
             </a>
-      </div>
+         </div>
+     </div>
+   
     </div>
     {%endfor%}
   </div>

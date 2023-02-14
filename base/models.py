@@ -19,7 +19,7 @@ class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     text = models.TextField(null=True, blank=True)
-    image: models.ImageField(null=True)
+    image = models.ImageField(null=True)
 
     likes = models.ManyToManyField(
         User, related_name="liked_posts", blank=True)

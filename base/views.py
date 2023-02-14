@@ -3,8 +3,10 @@ from .models import User, Post, Comment, CommentReply
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import RegisterForm, PostForm
+from django.http import HttpResponse
 # Create your views here.
 from django.db.models import Count
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 
 def homePage(request):
@@ -15,18 +17,34 @@ def homePage(request):
     return render(request, 'base/home.html', {"posts": posts})
 
 
+@login_required(login_url='login')
 def createPage(request):
     form = PostForm()
     if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
             data = form.save(commit=False)
+            data.author_id = request.user.id
             data.save()
             return redirect('home')
         else:
             messages.error(request, 'An error occurred during registration')
 
-    return render(request, 'base/create.html', {'form': form})
+    return render(request, 'base/createedit.html', {'form': form})
+
+
+@login_required(login_url='login')
+def editPage(request, id):
+    post = Post.objects.get(id=id)
+    form = PostForm(instance=post)
+
+    if request.user != post.author:
+        return HttpResponse('Your are not allowed here!!')
+    if request.method == 'POST':
+        post.text = request.POST.get('text')
+        post.save()
+        return redirect('home')
+    return render(request, 'base/createedit.html', {"form": form, "type": "edit"})
 
 
 def createCommentOnPost(request, id):
@@ -42,6 +60,7 @@ def createCommentOnPost(request, id):
     return redirect('home')
 
 
+@login_required(login_url='login')
 def ReplyToComment(request, id, post_id):
 
     comment = Comment.objects.get(id=id)
@@ -53,13 +72,22 @@ def ReplyToComment(request, id, post_id):
             reply=request.POST.get('reply')
         )
         return redirect('detail-post', post_id)
+
+
+@login_required(login_url='login')
+def deletePost(request, id):
+    post = Post.objects.get(id=id)
+    if post.author == request.user:
+        if request.method == 'POST':
+            post.delete()
+            messages.info(request, 'Post Deleted')
+            return redirect('home')
+    else:
+        return HttpResponse('Your are not allowed here!!')
     return redirect('home')
 
 
-def editPage(request):
-    return render(request, 'base/create.html')
-
-
+@login_required(login_url='login')
 def detailPostPage(request, id):
     post = Post.objects.get(id=id)
     users_who_liked = post.likes.all()
