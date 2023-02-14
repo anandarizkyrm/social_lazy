@@ -1,4 +1,4 @@
-<!-- 2. user should be able to delete it own post -->
+<!-- 1. user should be able to delete it own post -->
 
 2. user should be able to like post and unlike post
 
