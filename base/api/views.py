@@ -6,8 +6,9 @@ from .serializers import PostSerializers
 from django.core import serializers
 from django.http import JsonResponse
 from django.db.models import Count
-
+from rest_framework import status
 # Create your views here.
+from rest_framework.exceptions import ValidationError
 
 
 @api_view(['GET'])
@@ -19,3 +20,17 @@ def getUserPosts(request, id):
     serializer = PostSerializers(posts, many=True)
 
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def createPost(request):
+    print(request.META)
+    try:
+        serializer = PostSerializers(data=request.data)
+        if serializer.is_valid():
+            serializer.save(auhor=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            raise ValidationError(serializer.errors)
+    except:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
