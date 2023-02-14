@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from base.models import Post, Comment, CommentReply
-from .serializers import PostSerializers
+from .serializers import PostSerializers, CommentReplySerialize
 # from base.api import serializers
 from django.core import serializers
 from django.http import JsonResponse
@@ -9,20 +9,19 @@ from django.db.models import Count
 from rest_framework import status
 # Create your views here.
 from rest_framework.exceptions import ValidationError
+from django.db import connections
 
 
 @api_view(['GET'])
 def getUserPosts(request, id):
-    posts = Post.objects.filter(author_id=id).annotate(
-        total_comments=Count('comment'),
-        total_comment_replies=Count('comment__commentreply'),
-    )
-    serializer = PostSerializers(posts, many=True)
+    posts = Post.objects.filter(author_id=id).prefetch_related(
+        'comments', 'comments__comment_reply')
 
+    serializer = PostSerializers(posts, many=True)
     return Response(serializer.data)
 
 
-@api_view(['POST'])
+@ api_view(['POST'])
 def createPost(request):
     try:
         serializer = PostSerializers(data={
@@ -36,4 +35,4 @@ def createPost(request):
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
